@@ -20,6 +20,19 @@ from libcloud3.exceptions import MissingDependencyException
 
 
 def make_type(cls):
+    """
+    Uses the :class:`ResourceType` instance to provide 
+    metadata and generates a new type that inherits from :class:`Resource`.
+
+    This new type will have a name of :class:`ResourceType`.alias and have methods
+    for each of the operations described in `supports`.
+
+    The new type will have a `__init__` method which assigns the keys to instance
+    attributes
+
+    :rtype: ``type``
+    :returns: a new type
+    """
     def operation_method(targetcls, name):
         return getattr(targetcls, name)
 
@@ -49,7 +62,8 @@ def make_type(cls):
         for supported_operation in cls.supports:
             if supported_operation.applies_to_collection is False:
                 d[supported_operation.name] = operation_method(cls, supported_operation.name)
-                d['async_' + supported_operation.name] = operation_method(cls, 'async_' + supported_operation.name)
+                if cls.supports_async:
+                    d['async_' + supported_operation.name] = operation_method(cls, 'async_' + supported_operation.name)
 
         for attribute in cls.attributes:
             d[attribute] = None
@@ -59,6 +73,11 @@ def make_type(cls):
 
 
 class MissingDependencyCollection(object):
+    """
+    Describes missing dependencies in a driver.
+
+    TODO : Complete behaviour and assist users with understanding missing deps
+    """
     def __init__(self, missing):
         self.missing = missing
 
@@ -140,9 +159,16 @@ class ResourceType(object):
     """
     alias = None
 
+    """
+    Supports asynchronous methods
+
+    :type supports_async: ``bool``
+    """
+    supports_async = False
+
     def __init__(self, driver):
         self.driver = driver
-        self.t = make_type(self)
+        self.map = make_type(self)
 
 class Resource(object):
     """

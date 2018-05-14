@@ -24,6 +24,7 @@ class EC2InstanceType(ResourceType):
     """Represents an AWS EC2 Instance"""
 
     supports = [operations.Get, operations.Describe, operations.GetState]
+    supports_async = True
     alias = 'EC2Instances'
     attributes = ['id']
 
@@ -38,7 +39,7 @@ class EC2InstanceType(ResourceType):
         async with aioboto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret) as ec2:
             instances = await ec2.describe_instances()
             if len(instances['Reservations']) > 0:
-                return [self.t(self.driver, instance, id=instance['InstanceId'], region=region) for instance in instances['Reservations'][0]['Instances']]
+                return [self.map(self.driver, instance, id=instance['InstanceId'], region=region) for instance in instances['Reservations'][0]['Instances']]
             else:
                 return []
 

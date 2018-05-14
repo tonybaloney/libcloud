@@ -1,3 +1,4 @@
+env/
 *.py[co]
 *.sw[po]
 libcloud/test/secrets.py

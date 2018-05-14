@@ -27,7 +27,7 @@ class AzureComputeInstanceType(ResourceType):
 
     def get(self, driver, *args):
         groups = self.driver.resource_mgmt.list_all()
-        return [self.t(self.driver, g) for g in groups]
+        return [self.map(self.driver, g) for g in groups]
 
 
 class AzureResourceGroupType(ResourceType):

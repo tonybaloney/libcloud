@@ -33,11 +33,15 @@ class GcpComputeInstanceType(ResourceType):
             project=self.driver.project_id,
             zone=zone, *args, **kwargs).execute()
         items = result['items']
-        return [self.t(self.driver, i) for i in items]
+        return [self.map(self.driver, i) for i in items]
 
     @staticmethod
     def stop(instance, *args):
-        return "Stopping instance {0} has a name {1}".format(instance.id, instance.name)
+        result = instance.driver.compute.instances().stop(
+            project=instance.driver.project_id,
+            instance=instance.name,
+            *args, **kwargs).execute()
+        return result
 
 
 class GcpStorageBucketType(ResourceType):
@@ -50,7 +54,7 @@ class GcpStorageBucketType(ResourceType):
             project=self.driver.project_id,
             *args, **kwargs).execute()
         items = result['items']
-        return [self.t(self.driver, i) for i in items]
+        return [self.map(self.driver, i) for i in items]
 
 
 class GcpKubernetesClusterType(ResourceType):
@@ -64,14 +68,29 @@ class GcpKubernetesClusterType(ResourceType):
             parent=parent, *args, **kwargs).execute()
 
         items = result['clusters']
-        return [self.t(self.driver, i) for i in items]
+        return [self.map(self.driver, i) for i in items]
 
 
 class GcpDriver(Driver):
+    """
+    Google Cloud Platform Driver
+
+    """
     requires=['googleapiclient']
     provides=[GcpComputeInstanceType, GcpKubernetesClusterType, GcpStorageBucketType]
 
-    def __init__(self, project_id, auth_json=None, developer_key=None, *args):
+    def __init__(self, project_id, developer_key=None, *args):
+        """
+        Instantiate a new Google Cloud Driver
+
+        See documentation for permission and security setup details.
+
+        :param project_id: The GCP Project ID
+        :type  project_id: ``str``
+
+        :param developer_key: Developer API key (optional override for access)
+        :type  developer_key: ``str``
+        """
         self.project_id = project_id
         self.compute = googleapiclient.discovery.build('compute', 'v1', developerKey=developer_key)
         self.storage = googleapiclient.discovery.build('storage', 'v1', developerKey=developer_key)
