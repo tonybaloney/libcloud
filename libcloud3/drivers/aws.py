@@ -22,7 +22,7 @@ import boto3
 class EC2InstanceType(ResourceType):
     """Represents an AWS EC2 Instance"""
 
-    supports = [operations.Get, operations.Describe]
+    supports = [operations.Get, operations.Describe, operations.GetState]
     alias = 'EC2Instances'
     attributes = ['id']
 
@@ -32,10 +32,17 @@ class EC2InstanceType(ResourceType):
 
     def get(self, region):
         ec2 = boto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret)
-        return [self.t(self.driver, instance) for instance in ec2.describe_instances()['Reservations'][0]['Instances']]
+        return [self.t(self.driver, instance, id=instance['InstanceId'], region=region) for instance in ec2.describe_instances()['Reservations'][0]['Instances']]
 
-    def describe(self):
-        raise NotImplementedError()
+    @staticmethod
+    def status(instance):
+        ec2 = boto3.client('ec2', instance.region, aws_access_key_id=instance.driver.access_key, aws_secret_access_key=instance.driver.access_secret)
+        return ec2.describe_instance_status(InstanceIds=[instance.InstanceId])['InstanceStatuses'][0]
+
+    @staticmethod
+    def describe(instance):
+        ec2 = boto3.client('ec2', instance.region, aws_access_key_id=instance.driver.access_key, aws_secret_access_key=instance.driver.access_secret)
+        return ec2.describe_instances(InstanceIds=[instance.InstanceId])['Reservations'][0]['Instances'][0]
 
 
 class AWSDriver(Driver):

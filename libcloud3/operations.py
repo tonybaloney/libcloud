@@ -31,7 +31,7 @@ Deprovision = Operation('deprovision', 'Provision a resource', True, True)
 Start = Operation('start', 'Start the operation of a resource', False, True)
 Stop = Operation('stop', 'Stop the operation of a resource', False, True)
 Pause = Operation('pause', 'Pause the operation a resource', False, True)
-GetState = Operation('getstate', 'Get the state of operation of a resource', False, True)
+GetState = Operation('status', 'Get the state of operation of a resource', False, True)
 
 # Low-level operations resources
 Create = Operation('create', 'Create a new resource', True, False)
