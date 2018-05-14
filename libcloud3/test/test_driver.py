@@ -14,13 +14,9 @@
 # limitations under the License.
 
 import pytest
+
 from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
-
-
-class DummyDriver(Driver):
-    provides = [ExampleResourceType]
-    requires = []
 
 
 class ExampleResourceType(ResourceType):
@@ -28,9 +24,32 @@ class ExampleResourceType(ResourceType):
     alias = 'example'
 
 
+class DummyDriver(Driver):
+    provides = [ExampleResourceType]
+    requires = []
+
+
 @pytest.fixture
 def driver():
     return DummyDriver()
 
 
-def test_provision(driver):
+def test_unsupported_driver():
+    """
+    Test that a driver which depends on a package you don't have installed
+    shows unsupported
+    """
+
+    class BadDriver(Driver):
+        provides = []
+        requires = ['yabbadabbadoo']
+
+    supported = BadDriver.supported()
+    assert supported is not True
+
+
+def test_provides(driver):
+    assert isinstance(driver.provides, list)
+
+    for provides in driver.provides:
+        assert issubclass(provides, ResourceType)

@@ -14,11 +14,10 @@
 # limitations under the License.
 
 
-import sys
+class MissingDependencyException(Exception):
+    def __init__(self, package):
+        self.package = package
+        self.message = f"Missing {package}"
 
-
-def test_runtime_dist():
-    """
-    Check running on 3.5+
-    """
-    assert sys.version_info >= (3, 5)
+    def __str__(self):
+        return self.message
