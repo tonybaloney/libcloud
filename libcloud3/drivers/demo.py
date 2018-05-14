@@ -33,9 +33,7 @@ class DemoComputeInstanceType(ResourceType):
 
     @staticmethod
     def stop(instance, *args):
-        print(instance.id)
-        print(instance.name)
-        return "Hello world!!"
+        return "Stopping instance {0} has a name {1}".format(instance.id, instance.name)
 
 
 class DemoDriver(Driver):
@@ -48,6 +46,3 @@ class DemoDriver(Driver):
         
         for t in self.provides:
             setattr(self, t.alias, t(self))
-
-    def do_operation(self, operation, resource_type, instance, *args, **kwargs):
-        print("Doing operation!")

@@ -97,8 +97,6 @@ else:
     },
     package_data={'libcloud': get_data_files('libcloud', parent='libcloud')},
 
-print(package_data)
-
 def read_version_string():
     version = None
     sys.path.insert(0, pjoin(os.getcwd()))

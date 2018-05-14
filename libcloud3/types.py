@@ -15,7 +15,6 @@
 
 import types
 
-
 from libcloud3.operations import Operation
 from libcloud3.exceptions import MissingDependencyException
 
@@ -27,12 +26,20 @@ def make_type(cls):
     def body(ns):
         def __init__(self, driver, data, *args, **kwargs):
             self.driver = driver
-            for k,v in data.items():
+            for k, v in data.items():
                 setattr(self, k, v)
+
+        def __str__(self):
+            return '{0} id={1}'.format(cls.alias, self.id)
+
+        def __repr__(self):
+            return '<{0} id={1}>'.format(type(self).__name__, self.id)
 
         d = {
             '__doc__': 'An instance of {0}'.format(cls.alias),
             '__init__': __init__,
+            '__str__': __str__,
+            '__repr__': __repr__
         }
 
         for supported_operation in cls.supports:
