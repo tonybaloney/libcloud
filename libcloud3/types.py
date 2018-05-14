@@ -13,8 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import types
+
+
 from libcloud3.operations import Operation
 from libcloud3.exceptions import MissingDependencyException
+
+
+def make_type(cls):
+    def operation_method(targetcls, name):
+        return getattr(targetcls, name)
+
+    def body(ns):
+        def __init__(self, driver, *args, **kwargs):
+            self.driver = driver
+            self.extra = args
+
+        d = {
+            '__doc__': 'An instance of ..',
+            '__init__': __init__,
+        }
+
+        for supported_operation in cls.supports:
+            d[supported_operation.name] = operation_method(cls, supported_operation.name)
+
+        for attribute in cls.attributes:
+            d[attribute] = None
+
+        ns.update(d)
+    return types.new_class(cls.alias, bases=(Resource,), exec_body=body)
 
 
 class MissingDependencyCollection(object):
@@ -97,6 +124,8 @@ class ResourceType(object):
     """
     alias = None
 
+    def __init__(self):
+        self.t = make_type(self)
 
 class Resource(object):
     """
