@@ -92,8 +92,6 @@ class Driver(object):
         for t in self.provides:
             setattr(self, t.alias, t(self))
 
-    def do_operation(self, operation, resource_type, instance, *args, **kwargs):
-        raise NotImplementedError()
 
     @classmethod
     def supported(cls):
