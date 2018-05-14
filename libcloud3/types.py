@@ -26,7 +26,11 @@ def make_type(cls):
     def body(ns):
         def __init__(self, driver, data, *args, **kwargs):
             self.driver = driver
+
             for k, v in data.items():
+                setattr(self, k, v)
+
+            for k, v in kwargs.items():
                 setattr(self, k, v)
 
         def __str__(self):
@@ -43,7 +47,8 @@ def make_type(cls):
         }
 
         for supported_operation in cls.supports:
-            d[supported_operation.name] = operation_method(cls, supported_operation.name)
+            if supported_operation.applies_to_collection is False:
+                d[supported_operation.name] = operation_method(cls, supported_operation.name)
 
         for attribute in cls.attributes:
             d[attribute] = None
@@ -82,7 +87,11 @@ class Driver(object):
     ``list`` of ``str``
     """
     requires = []
-    
+
+    def __init__(self):
+        for t in self.provides:
+            setattr(self, t.alias, t(self))
+
     def do_operation(self, operation, resource_type, instance, *args, **kwargs):
         raise NotImplementedError()
 
