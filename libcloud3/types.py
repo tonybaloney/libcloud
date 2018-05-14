@@ -25,12 +25,13 @@ def make_type(cls):
         return getattr(targetcls, name)
 
     def body(ns):
-        def __init__(self, driver, *args, **kwargs):
+        def __init__(self, driver, data, *args, **kwargs):
             self.driver = driver
-            self.extra = args
+            for k,v in data.items():
+                setattr(self, k, v)
 
         d = {
-            '__doc__': 'An instance of ..',
+            '__doc__': 'An instance of {0}'.format(cls.alias),
             '__init__': __init__,
         }
 
