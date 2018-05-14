@@ -39,4 +39,4 @@ Delete = Operation('delete', 'Delete an existing resource')
 Describe = Operation('describe', 'Get detailed information on a resource')
 Get = Operation('get', 'Retrieves a list of resources of this type')
 
-BASE = {Provision, Deprovision, Start, Stop, Pause, GetState, Create, Delete, Read}
+BASE = {Provision, Deprovision, Start, Stop, Pause, GetState, Create, Delete, Describe, Get}

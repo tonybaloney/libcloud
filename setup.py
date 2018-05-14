@@ -87,7 +87,7 @@ if LIBCLOUD_3_SUPPORTED:
         'libcloud3': 'libcloud3'
     },
     package_data={
-        'libcloud': get_data_files('libcloud', parent='libcloud')
+        'libcloud': get_data_files('libcloud', parent='libcloud'),
         'libcloud3': get_data_files('libcloud3', parent='libcloud3')
     },
 else:
@@ -96,6 +96,8 @@ else:
         'libcloud': 'libcloud',
     },
     package_data={'libcloud': get_data_files('libcloud', parent='libcloud')},
+
+print(package_data)
 
 def read_version_string():
     version = None
@@ -155,7 +157,7 @@ setup(
                 ' and documentation, please see http://libcloud.apache.org',
     author='Apache Software Foundation',
     author_email='dev@libcloud.apache.org',
-    install_requires=_install_requires,
+    install_requires=install_requires,
     packages=packages,
     package_dir=package_dir,
     package_data=package_data,

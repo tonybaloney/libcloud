@@ -17,42 +17,24 @@
 from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
 
-from azure.common.credentials import ServicePrincipalCredentials
-from azure.mgmt.resource import ResourceManagementClient
 
-
-class AzureComputeInstanceType(ResourceType):
+class DemoComputeInstanceType(ResourceType):
     supports = [operations.Get]
-    alias = 'ComputeInstance'
+    alias = 'DemoComputeInstance'
 
     @classmethod
     def get(cls, driver, *args):
         # do read command..
-        pass
+        return [1,2,3,4]
 
 
-class AzureResourceGroupType(ResourceType):
-    supports = [operations.Get]
-    alias = 'ResourceGroup'
+class DemoDriver(Driver):
+    requires=[]
+    provides=[DemoComputeInstanceType]
 
-    @classmethod
-    def get(cls, driver, *args):
-        # do read command.. do the meta generation here
-        return driver.resource_mgmt.list_all()
-
-
-class AzureDriver(Driver):
-    requires=['azure']
-    provides=[AzureComputeInstance]
-
-    def __init__(self, subscription_id, client_id, secret, tenant, *args):
+    def __init__(self, subscription_id, *args):
         self.subscription_id = subscription_id
-        self.credentials = ServicePrincipalCredentials(
-            client_id=client_id,
-            secret=secret,
-            tenant=tenant
-        )
-        self.resource_mgmt = ResourceManagementClient(credentials, subscription_id)
+        self.connection = "immutable thing"
         
 
     def do_operation(self, operation, resource_type, instance, *args, **kwargs):
