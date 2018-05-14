@@ -27,15 +27,16 @@ Operation = namedtuple('Operation', ['name', 'description'])
 Provision = Operation('provision', 'Provision a resource')
 Deprovision = Operation('deprovision', 'Provision a resource')
 
-# For resources where the operation is 
+# For resources where the operation is
 Start = Operation('start', 'Start the operation of a resource')
 Stop = Operation('stop', 'Stop the operation of a resource')
 Pause = Operation('pause', 'Pause the operation a resource')
 GetState = Operation('getstate', 'Get the state of operation of a resource')
 
 # Low-level operations resources
-Create = Operation('create', 'Provision a resource')
-Delete = Operation('delete', 'Provision a resource')
-Read = Operation('read', 'Provision a resource')
+Create = Operation('create', 'Create a new resource')
+Delete = Operation('delete', 'Delete an existing resource')
+Describe = Operation('describe', 'Get detailed information on a resource')
+Get = Operation('get', 'Retrieves a list of resources of this type')
 
 BASE = {Provision, Deprovision, Start, Stop, Pause, GetState, Create, Delete, Read}
