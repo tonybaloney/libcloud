@@ -48,6 +48,9 @@ class Driver(object):
     """
     requires = []
     
+    def do_operation(self, operation, resource_type, instance, *args, **kwargs):
+        raise NotImplementedError()
+
     @classmethod
     def supported(cls):
         """
@@ -65,6 +68,14 @@ class Driver(object):
             return True
         else:
             return MissingDependencyCollection(errors)
+
+    def __getattr__(self, name):
+        """
+        Returns a redirect to the type accessor
+        """
+        for provided_type in self.provides:
+            if name == provided_type.alias:
+                return provided_type
 
 
 class ResourceType(object):
