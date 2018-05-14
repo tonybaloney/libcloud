@@ -31,12 +31,8 @@ class GcpComputeInstanceType(ResourceType):
     alias = 'ComputeInstance'
     attributes = ['id', 'name']
 
-    def __init__(self, driver):
-        self.driver = driver
-        super().__init__()
-
     def get(self, zone, *args, **kwargs):
-        result = compute.instances().list(
+        result = self.driver.compute.instances().list(
             project=self.driver.project_id,
             zone=zone, *args, **kwargs).execute()
         items = result['items']
@@ -54,4 +50,5 @@ class GcpDriver(Driver):
     def __init__(self, project_id, auth_json=None, developer_key=None, *args):
         self.project_id = project_id
         self.compute = googleapiclient.discovery.build('compute', 'v1', developerKey=developer_key)
+        self.storage = googleapiclient.discovery.build('storage', 'v1', developerKey=developer_key)
         super().__init__()

@@ -1,10 +1,6 @@
 from libcloud3.drivers.gcp import GcpDriver
-import os
 
-driver = GcpDriver(
-    project_id='libcloud-dev',
-    developer_key=os.environ['GOOGLE_API_KEY'])
-
-instances = driver.ComputeInstance.get()
+driver = GcpDriver(project_id='libcloud-dev')
+instances = driver.ComputeInstance.get('us-west1-b')
 
 print(instances)
