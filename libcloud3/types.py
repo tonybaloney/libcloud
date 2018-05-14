@@ -42,6 +42,7 @@ class Driver(object):
 
     """
     Describes what package dependencies are required for this driver
+    e.g boto3
 
     ``list`` of ``str``
     """
@@ -50,7 +51,7 @@ class Driver(object):
     @classmethod
     def supported(cls):
         """
-        Checks all packages required are 
+        Checks all packages required are installed.
 
         :returns: ``True`` if supported, instance of :class:`MissingDependencyCollection`
         """

@@ -13,46 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 
 from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
 
 
-class ExampleResourceType(ResourceType):
-    supports = [operations.Read, operations.Create]
-    alias = 'example'
+class AzureComputeInstance(ResourceType):
+    supports = [operations.Read]
+    alias = 'compute'
 
 
-class DummyDriver(Driver):
-    provides = [ExampleResourceType]
-    requires = []
+class AzureDriver(Driver):
+    requires=['azure']
+    provides=[AzureComputeInstance]
 
-    def do_operation(self, resource_type, instance, *args, **kwargs):
-        # magic..
-        
+    def __init__(self, *args):
+        pass
 
-@pytest.fixture
-def driver():
-    return DummyDriver()
+    def do_operation(self, operation, resource_type, instance, *args, **kwargs):
+        pass
 
-
-def test_unsupported_driver():
-    """
-    Test that a driver which depends on a package you don't have installed
-    shows unsupported
-    """
-
-    class BadDriver(Driver):
-        provides = []
-        requires = ['yabbadabbadoo']
-
-    supported = BadDriver.supported()
-    assert supported is not True
-
-
-def test_provides(driver):
-    assert isinstance(driver.provides, list)
-
-    for provides in driver.provides:
-        assert issubclass(provides, ResourceType)
