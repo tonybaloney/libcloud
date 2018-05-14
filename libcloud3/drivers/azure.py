@@ -17,19 +17,40 @@
 from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
 
+from azure.common.credentials import ServicePrincipalCredentials
 
-class AzureComputeInstance(ResourceType):
-    supports = [operations.Read]
-    alias = 'compute'
+
+class AzureComputeInstanceType(ResourceType):
+    supports = [operations.Get]
+    alias = 'ComputeInstance'
+
+    @classmethod
+    def get(cls, driver, *args):
+        # do read command..
+        pass
+
+
+class AzureResourceGroupType(ResourceType):
+    supports = [operations.Get]
+    alias = 'ResourceGroup'
+
+    @classmethod
+    def get(cls, driver, *args):
+        # do read command..
+        return 'hello!'
 
 
 class AzureDriver(Driver):
     requires=['azure']
     provides=[AzureComputeInstance]
 
-    def __init__(self, *args):
-        pass
+    def __init__(self, subscription_id, client_id, secret, tenant, *args):
+        self.subscription_id = subscription_id
+        self.credentials = ServicePrincipalCredentials(
+            client_id=client_id,
+            secret=secret,
+            tenant=tenant
+        )
 
     def do_operation(self, operation, resource_type, instance, *args, **kwargs):
         pass
-
