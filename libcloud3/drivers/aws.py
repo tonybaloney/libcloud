@@ -16,10 +16,13 @@
 
 from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
+import boto3
 
 
 class EC2Instance():
-    def __init__(self, instance_id):
+
+    def __init__(self, driver, instance_id):
+        self.driver = driver
         self.instance_id = instance_id
 
     def __str__(self):
@@ -37,11 +40,10 @@ class EC2InstanceType(ResourceType):
 
     def __init__(self, driver):
         self.driver = driver
+        self.ec2 = boto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret)
 
     def get(self, region):
-        import boto3
-        ec2 = boto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret)
-        return [EC2Instance(instance['InstanceId']) for instance in ec2.describe_instances()['Reservations'][0]['Instances']]
+        return [EC2Instance(self.driver, instance['InstanceId']) for instance in self.ec2.describe_instances()['Reservations'][0]['Instances']]
 
 
 class AWSDriver(Driver):
