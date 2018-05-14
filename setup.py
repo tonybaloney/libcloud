@@ -41,6 +41,9 @@ PY2_pre_26 = PY2 and sys.version_info < (2, 6)
 PY2_pre_27 = PY2 and sys.version_info < (2, 7)
 PY2_pre_279 = PY2 and sys.version_info < (2, 7, 9)
 
+# Check version for libcloud 3 support, async/await.
+LIBCLOUD_3_SUPPORTED = PY3 and sys.version_info >= (3, 5)
+
 HTML_VIEWSOURCE_BASE = 'https://svn.apache.org/viewvc/libcloud/trunk'
 PROJECT_BASE_DIR = 'http://libcloud.apache.org'
 TEST_PATHS = ['libcloud/test', 'libcloud/test/common', 'libcloud/test/compute',
@@ -72,6 +75,27 @@ if PY2_pre_27 or PY3_pre_34:
           ', '.join(SUPPORTED_VERSIONS))
     sys.exit(1)
 
+install_requires = ['requests']
+
+if PY2_pre_279:
+    install_requires.append('backports.ssl_match_hostname')
+
+if LIBCLOUD_3_SUPPORTED:
+    packages=get_packages('libcloud') + get_packages('libcloud3')
+    package_dir={
+        'libcloud': 'libcloud',
+        'libcloud3': 'libcloud3'
+    },
+    package_data={
+        'libcloud': get_data_files('libcloud', parent='libcloud')
+        'libcloud3': get_data_files('libcloud3', parent='libcloud3')
+    },
+else:
+    packages=get_packages('libcloud')
+    package_dir={
+        'libcloud': 'libcloud',
+    },
+    package_data={'libcloud': get_data_files('libcloud', parent='libcloud')},
 
 def read_version_string():
     version = None
@@ -120,11 +144,6 @@ class ApiDocsCommand(Command):
 
 forbid_publish()
 
-install_requires = ['requests']
-
-if PY2_pre_279:
-    install_requires.append('backports.ssl_match_hostname')
-
 needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if needs_pytest else []
 
@@ -136,12 +155,10 @@ setup(
                 ' and documentation, please see http://libcloud.apache.org',
     author='Apache Software Foundation',
     author_email='dev@libcloud.apache.org',
-    install_requires=install_requires,
-    packages=get_packages('libcloud'),
-    package_dir={
-        'libcloud': 'libcloud',
-    },
-    package_data={'libcloud': get_data_files('libcloud', parent='libcloud')},
+    install_requires=_install_requires,
+    packages=packages,
+    package_dir=package_dir,
+    package_data=package_data,
     license='Apache License (2.0)',
     url='http://libcloud.apache.org/',
     setup_requires=pytest_runner,
