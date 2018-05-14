@@ -18,21 +18,42 @@ from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
 
 
-class AWSComputeInstance(ResourceType):
+class EC2Instance():
+    def __init__(self, instance_id):
+        self.instance_id = instance_id
+
+    def __str__(self):
+        return "EC2Instance<" + self.instance_id + ">"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class EC2InstanceType(ResourceType):
     """Represents an AWS EC2 Instance"""
 
-    supports = [operations.Read]
-    alias = 'compute'
+    supports = [operations.Get, operations.Describe]
+    alias = 'instances'
+
+    def __init__(self, driver):
+        self.driver = driver
+
+    def get(self, region):
+        import boto3
+        ec2 = boto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret)
+        return [EC2Instance(instance['InstanceId']) for instance in ec2.describe_instances()['Reservations'][0]['Instances']]
 
 
 class AWSDriver(Driver):
     """Enables operations with AWS accounts"""
 
     requires=['boto3']
-    provides=[AWSComputeInstance]
+    provides=[EC2InstanceType]
 
-    def __init__(self, *args):
-        pass
+    def __init__(self, access_key, access_secret):
+        self.access_key = access_key
+        self.access_secret = access_secret
 
-    def do_operation(self, operation, resource_type, instance, *args, **kwargs):
-        pass
+    @property
+    def instances(self):
+        return EC2InstanceType(self)

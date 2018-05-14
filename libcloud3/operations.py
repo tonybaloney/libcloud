@@ -22,21 +22,21 @@
 
 from collections import namedtuple
 
-Operation = namedtuple('Operation', ['name', 'description'])
+Operation = namedtuple('Operation', ['name', 'description', 'applies_to_collection', 'applies_to_instance'])
 
-Provision = Operation('provision', 'Provision a resource')
-Deprovision = Operation('deprovision', 'Provision a resource')
+Provision = Operation('provision', 'Provision a resource', True, False)
+Deprovision = Operation('deprovision', 'Provision a resource', True, True)
 
 # For resources where the operation is
-Start = Operation('start', 'Start the operation of a resource')
-Stop = Operation('stop', 'Stop the operation of a resource')
-Pause = Operation('pause', 'Pause the operation a resource')
-GetState = Operation('getstate', 'Get the state of operation of a resource')
+Start = Operation('start', 'Start the operation of a resource', False, True)
+Stop = Operation('stop', 'Stop the operation of a resource', False, True)
+Pause = Operation('pause', 'Pause the operation a resource', False, True)
+GetState = Operation('getstate', 'Get the state of operation of a resource', False, True)
 
 # Low-level operations resources
-Create = Operation('create', 'Create a new resource')
-Delete = Operation('delete', 'Delete an existing resource')
-Describe = Operation('describe', 'Get detailed information on a resource')
-Get = Operation('get', 'Retrieves a list of resources of this type')
+Create = Operation('create', 'Create a new resource', True, False)
+Delete = Operation('delete', 'Delete an existing resource', True, True)
+Describe = Operation('describe', 'Get detailed information on a resource', False, True)
+Get = Operation('get', 'Retrieves a list of resources of this type', True, False)
 
 BASE = {Provision, Deprovision, Start, Stop, Pause, GetState, Create, Delete, Describe, Get}
