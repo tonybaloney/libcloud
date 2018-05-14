@@ -28,8 +28,7 @@ class EC2InstanceType(ResourceType):
     attributes = ['id']
 
     def __init__(self, driver):
-        self.driver = driver
-        super().__init__()
+        super().__init__(driver)
 
     def get(self, region):
         return asyncio.get_event_loop().run_until_complete(self.async_get(region))
