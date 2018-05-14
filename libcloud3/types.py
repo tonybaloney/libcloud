@@ -49,6 +49,7 @@ def make_type(cls):
         for supported_operation in cls.supports:
             if supported_operation.applies_to_collection is False:
                 d[supported_operation.name] = operation_method(cls, supported_operation.name)
+                d['async_' + supported_operation.name] = operation_method(cls, 'async_' + supported_operation.name)
 
         for attribute in cls.attributes:
             d[attribute] = None

@@ -16,7 +16,8 @@
 
 from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
-import boto3
+import asyncio
+import aioboto3
 
 
 class EC2InstanceType(ResourceType):
@@ -31,18 +32,35 @@ class EC2InstanceType(ResourceType):
         super().__init__()
 
     def get(self, region):
-        ec2 = boto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret)
-        return [self.t(self.driver, instance, id=instance['InstanceId'], region=region) for instance in ec2.describe_instances()['Reservations'][0]['Instances']]
+        return asyncio.get_event_loop().run_until_complete(self.async_get(region))
+
+    async def async_get(self, region):
+        async with aioboto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret) as ec2:
+            instances = await ec2.describe_instances()
+            if len(instances['Reservations']) > 0:
+                return [self.t(self.driver, instance, id=instance['InstanceId'], region=region) for instance in instances['Reservations'][0]['Instances']]
+            else:
+                return []
 
     @staticmethod
-    def status(instance):
-        ec2 = boto3.client('ec2', instance.region, aws_access_key_id=instance.driver.access_key, aws_secret_access_key=instance.driver.access_secret)
-        return ec2.describe_instance_status(InstanceIds=[instance.InstanceId])['InstanceStatuses'][0]
+    def status(self):
+        return asyncio.get_event_loop().run_until_complete(self.async_status())
 
     @staticmethod
-    def describe(instance):
-        ec2 = boto3.client('ec2', instance.region, aws_access_key_id=instance.driver.access_key, aws_secret_access_key=instance.driver.access_secret)
-        return ec2.describe_instances(InstanceIds=[instance.InstanceId])['Reservations'][0]['Instances'][0]
+    async def async_status(instance):
+        async with aioboto3.client('ec2', instance.region, aws_access_key_id=instance.driver.access_key, aws_secret_access_key=instance.driver.access_secret) as ec2:
+            resp = await ec2.describe_instance_status(InstanceIds=[instance.InstanceId])
+            return None if len(resp['InstanceStatuses']) == 0 else resp['InstanceStatuses'][0]
+
+    @staticmethod
+    def describe(self):
+        return asyncio.get_event_loop().run_until_complete(self.async_describe())
+
+    @staticmethod
+    async def async_describe(instance):
+        async with aioboto3.client('ec2', instance.region, aws_access_key_id=instance.driver.access_key, aws_secret_access_key=instance.driver.access_secret) as ec2:
+            resp = await ec2.describe_instances(InstanceIds=[instance.InstanceId])
+            return None if len(resp['Reservations']) == 0 else resp['Reservations'][0]['Instances'][0]
 
 
 class AWSDriver(Driver):
