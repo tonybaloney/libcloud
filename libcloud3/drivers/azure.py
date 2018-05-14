@@ -25,15 +25,16 @@ class AzureComputeInstanceType(ResourceType):
     supports = [operations.Get]
     alias = 'ComputeInstance'
 
-    @classmethod
-    def get(cls, driver, *args):
-        # do read command..
-        pass
+    def get(self, driver, *args):
+        groups = self.driver.resource_mgmt.list_all()
+        return [self.t(self.driver, g) for g in groups]
 
 
 class AzureResourceGroupType(ResourceType):
     supports = [operations.Get]
     alias = 'ResourceGroup'
+
+    attributes = ['id', 'name']
 
     @classmethod
     def get(cls, driver, *args):
@@ -43,7 +44,7 @@ class AzureResourceGroupType(ResourceType):
 
 class AzureDriver(Driver):
     requires=['azure']
-    provides=[AzureComputeInstance]
+    provides=[AzureResourceGroupType]
 
     def __init__(self, subscription_id, client_id, secret, tenant, *args):
         self.subscription_id = subscription_id
@@ -53,7 +54,3 @@ class AzureDriver(Driver):
             tenant=tenant
         )
         self.resource_mgmt = ResourceManagementClient(credentials, subscription_id)
-        
-
-    def do_operation(self, operation, resource_type, instance, *args, **kwargs):
-        print("Doing operation!")
