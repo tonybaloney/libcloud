@@ -41,8 +41,10 @@ class DemoDriver(Driver):
     provides=[DemoComputeInstanceType]
 
     def __init__(self, subscription_id, *args):
+        super().__init__()
+
         self.subscription_id = subscription_id
         self.connection = "immutable thing"
-        
-        for t in self.provides:
-            setattr(self, t.alias, t(self))
+
+    def do_operation(self, operation, resource_type, instance, *args, **kwargs):
+        print("Doing operation!")

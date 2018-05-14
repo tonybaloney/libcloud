@@ -82,7 +82,12 @@ class Driver(object):
     ``list`` of ``str``
     """
     requires = []
-    
+
+    def __init__(self):
+        for t in self.provides:
+            setattr(self, t.alias, t(self))
+
+
     def do_operation(self, operation, resource_type, instance, *args, **kwargs):
         raise NotImplementedError()
 

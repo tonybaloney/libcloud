@@ -19,31 +19,23 @@ import libcloud3.operations as operations
 import boto3
 
 
-class EC2Instance():
-
-    def __init__(self, driver, instance_id):
-        self.driver = driver
-        self.instance_id = instance_id
-
-    def __str__(self):
-        return "EC2Instance<" + self.instance_id + ">"
-
-    def __repr__(self):
-        return self.__str__()
-
-
 class EC2InstanceType(ResourceType):
     """Represents an AWS EC2 Instance"""
 
     supports = [operations.Get, operations.Describe]
-    alias = 'instances'
+    alias = 'EC2Instances'
+    attributes = ['id']
 
     def __init__(self, driver):
         self.driver = driver
-        self.ec2 = boto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret)
+        super().__init__()
 
     def get(self, region):
-        return [EC2Instance(self.driver, instance['InstanceId']) for instance in self.ec2.describe_instances()['Reservations'][0]['Instances']]
+        ec2 = boto3.client('ec2', region, aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret)
+        return [self.t(self.driver, instance) for instance in ec2.describe_instances()['Reservations'][0]['Instances']]
+
+    def describe(self):
+        raise NotImplementedError()
 
 
 class AWSDriver(Driver):
@@ -53,9 +45,9 @@ class AWSDriver(Driver):
     provides=[EC2InstanceType]
 
     def __init__(self, access_key, access_secret):
+        super().__init__()
         self.access_key = access_key
         self.access_secret = access_secret
 
-    @property
-    def instances(self):
-        return EC2InstanceType(self)
+        for t in self.provides:
+            setattr(self, t.alias, t(self))
