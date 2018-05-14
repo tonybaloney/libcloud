@@ -34,6 +34,7 @@ class DemoComputeInstanceType(ResourceType):
     @staticmethod
     def stop(instance, *args):
         print(instance.id)
+        print(instance.name)
         return "Hello world!!"
 
 
