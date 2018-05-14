@@ -52,7 +52,6 @@ class AWSDriver(Driver):
     provides=[EC2InstanceType]
 
     def __init__(self, access_key, access_secret):
-        super().__init__(self)
+        super().__init__()
         self.access_key = access_key
         self.access_secret = access_secret
-

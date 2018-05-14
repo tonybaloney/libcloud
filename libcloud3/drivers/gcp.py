@@ -54,4 +54,4 @@ class GcpDriver(Driver):
     def __init__(self, project_id, auth_json=None, developer_key=None, *args):
         self.project_id = project_id
         self.compute = googleapiclient.discovery.build('compute', 'v1', developerKey=developer_key)
-        super().__init__(self)
+        super().__init__()
