@@ -12,7 +12,8 @@ Principles
 Reasoning :
 
 * Community-driven development of a libcloud-only implementation of AWS and Azure is unsustainable. The Azure driver is buggy and only supports a fraction of services.
-* Cloud vendors have moved toward auto-generated API clients, supporting
+* Cloud vendors have moved toward auto-generated API clients, supporting these via a library would keep the package up to date
+* Most cloud vendors do not version their APIs
 * Drivers can depend upon 3rd party libraries, where those libraries are maintained by the cloud vendor.
 
 Design : 
@@ -46,6 +47,7 @@ Reasoning:
 * This is no longer the case, each cloud provider offers 10's, and in some cases, 100's of unique services
 * Providing abstraction layers for each-and-every service is impractical. The overhead in defining services and the base APIs as well as finding common 
     operations. The last API added was the container API, which still only has 3 implementations.
+* The 3 most popular public cloud platforms all follow this design in their APIs
 
 .. code-block:: Python
 
@@ -113,13 +115,28 @@ Reasoning:
 -----------------------------------------------------------
 
 Reasoning: 
-* The number of resources that some drivers could define will be in the hundreds, having these all in a single
-    file will be difficult to read and maintain
+
+* The number of resources that some drivers could define will be in the hundreds, having these all in a single file will be difficult to read and maintain
 * Instead, drivers can have a submodule directory and import resource types
 
 Potential issues:
 
 * Cloud providers having multiple authentication mechanisms for different services.
+
+5. Support as many resource types as possible
+---------------------------------------------
+
+The model described in 1), 2) and 4) will allow for simple support of PaaS and FaaS services, such as:
+
+* Functions-as-a-Service, eg. AWS Lambda, Azure Functions
+* Speech recognition and AI services
+* Big data services
+
+All of these services follow the same resource-provisioning model.
+
+6. Support dependency-tree provisioning and idempotent deployment
+-----------------------------------------------------------------
+
 
 
 Example snippets
