@@ -13,12 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 
 from libcloud3.types import Driver, ResourceType
 import libcloud3.operations as operations
-import asyncio
-import aioboto3
 
+try:
+    import aioboto3
+    _IMPORT_WARNING = False
+except ImportError:
+    _IMPORT_WARNING = True
 
 class EC2InstanceType(ResourceType):
     """Represents an AWS EC2 Instance"""
@@ -64,9 +68,11 @@ class EC2InstanceType(ResourceType):
 
 
 class AWSDriver(Driver):
-    """Enables operations with AWS accounts"""
+    """
+    Enables operations with AWS accounts
+    """
 
-    requires=['boto3']
+    requires=['aioboto3']
     provides=[EC2InstanceType]
 
     def __init__(self, access_key, access_secret):

@@ -20,7 +20,11 @@ Requires googleapiclient for Python
 from libcloud3.types import Driver, ResourceType, Resource
 import libcloud3.operations as operations
 
-import googleapiclient.discovery
+try:
+    import googleapiclient.discovery
+    _IMPORT_WARNING = False
+except ImportError:
+    _IMPORT_WARNING = True
 
 
 class GcpComputeInstanceType(ResourceType):
@@ -76,6 +80,7 @@ class GcpDriver(Driver):
     Google Cloud Platform Driver
 
     """
+
     requires=['googleapiclient']
     provides=[GcpComputeInstanceType, GcpKubernetesClusterType, GcpStorageBucketType]
 

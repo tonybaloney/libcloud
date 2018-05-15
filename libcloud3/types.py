@@ -21,7 +21,7 @@ from libcloud3.exceptions import MissingDependencyException
 
 def make_type(cls):
     """
-    Uses the :class:`ResourceType` instance to provide 
+    Uses the :class:`ResourceType` instance to provide
     metadata and generates a new type that inherits from :class:`Resource`.
 
     This new type will have a name of :class:`ResourceType`.alias and have methods
@@ -82,10 +82,13 @@ class MissingDependencyCollection(object):
         self.missing = missing
 
     def __bool__(self):
-        return false
+        return False
 
     def __iter__(self):
         return self.missing.__iter__
+
+    def __repr__(self):
+        return "Missing dependencies [{0}]".format(','.join(self.missing))
 
 
 class Driver(object):
@@ -112,6 +115,13 @@ class Driver(object):
         for t in self.provides:
             setattr(self, t.alias, t(self))
 
+    def __getattr__(self, name):
+        """
+        Returns a redirect to the type accessor
+        """
+        for provided_type in self.provides:
+            if name == provided_type.alias:
+                return provided_type
 
     @classmethod
     def supported(cls):
@@ -121,7 +131,7 @@ class Driver(object):
         :returns: ``True`` if supported, instance of :class:`MissingDependencyCollection`
         """
         errors = []
-        for dependency in cls.provides:
+        for dependency in cls.requires:
             try:
                 _temp = __import__(dependency)
             except ImportError as ie:
@@ -131,13 +141,19 @@ class Driver(object):
         else:
             return MissingDependencyCollection(errors)
 
-    def __getattr__(self, name):
+    @classmethod
+    def describe(cls):
         """
-        Returns a redirect to the type accessor
+        Describe the list of resources and the operations they support in rST
         """
-        for provided_type in self.provides:
-            if name == provided_type.alias:
-                return provided_type
+
+        doc = cls.__name__
+        for resource in cls.provides:
+            doc += "\nResource: {0}\n\tOperations:".format(resource.alias)
+
+            for operation in resource.supports:
+                doc += "\n\t\t- *{0}* : {1}".format(operation.name, operation.description)
+        return doc
 
 
 class ResourceType(object):
