@@ -24,6 +24,7 @@ try:
 except ImportError:
     _IMPORT_WARNING = True
 
+
 class EC2InstanceType(ResourceType):
     """Represents an AWS EC2 Instance"""
 
@@ -85,10 +86,32 @@ class S3BucketType(ResourceType):
         async with aioboto3.client('s3', aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret) as s3:
             buckets = await s3.list_buckets()
             if len(buckets['Buckets']) > 0:
-                return [self.t(self.driver, bucket, id=bucket['Name']) for bucket in buckets['Buckets']]
+                return [self.map(self.driver, bucket, id=bucket['Name']) for bucket in buckets['Buckets']]
             else:
                 return []
 
+
+class S3ObjectType(ResourceType):
+    """Represents an AWS S3 Object"""
+
+    supports = [operations.Get]
+    supports_async = True
+    alias = 'S3Object'
+    attributes = ['id']
+
+    def __init__(self, driver):
+        super().__init__(driver)
+
+    def get(self, bucket):
+        return asyncio.get_event_loop().run_until_complete(self.async_get(bucket))
+
+    async def async_get(self, bucket):
+        async with aioboto3.client('s3', aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret) as s3:
+            objs = await s3.list_objects_v2(Bucket=bucket)
+            if len(objs['Contents']) > 0:
+                return [self.map(self.driver, obj, id=obj['Key']) for obj in objs['Contents']]
+            else:
+                return []
 
 
 class AWSDriver(Driver):
@@ -97,7 +120,7 @@ class AWSDriver(Driver):
     """
 
     requires=['aioboto3']
-    provides=[EC2InstanceType, S3BucketType]
+    provides=[EC2InstanceType, S3BucketType, S3ObjectType]
 
     def __init__(self, access_key, access_secret):
         super().__init__()

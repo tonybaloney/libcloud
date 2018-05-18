@@ -50,3 +50,14 @@ def test_s3bucket_list():
 
     assert isinstance(buckets, list)
     assert buckets[0].id == buckets[0].Name
+
+
+def test_s3object_list():
+    """Verify that we can instantiate an AWSDriver that lists S3 buckets"""
+
+    aws = AWSDriver(access_key=os.environ.get('AWS_ACCESS_KEY'), access_secret=os.environ.get('AWS_ACCESS_SECRET'))
+    buckets = aws.S3Bucket.get()
+    obj = aws.S3Object.get(buckets[0].id)
+
+    assert isinstance(buckets, list)
+    assert obj.id == obj.Key
