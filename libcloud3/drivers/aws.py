@@ -29,7 +29,7 @@ class EC2InstanceType(ResourceType):
 
     supports = [operations.Get, operations.Describe, operations.GetState]
     supports_async = True
-    alias = 'EC2Instances'
+    alias = 'EC2Instance'
     attributes = ['id']
 
     def __init__(self, driver):
@@ -67,13 +67,37 @@ class EC2InstanceType(ResourceType):
             return None if len(resp['Reservations']) == 0 else resp['Reservations'][0]['Instances'][0]
 
 
+class S3BucketType(ResourceType):
+    """Represents an AWS S3 Bucket"""
+
+    supports = [operations.Get]
+    supports_async = True
+    alias = 'S3Bucket'
+    attributes = ['id']
+
+    def __init__(self, driver):
+        super().__init__(driver)
+
+    def get(self):
+        return asyncio.get_event_loop().run_until_complete(self.async_get())
+
+    async def async_get(self):
+        async with aioboto3.client('s3', aws_access_key_id=self.driver.access_key, aws_secret_access_key=self.driver.access_secret) as s3:
+            buckets = await s3.list_buckets()
+            if len(buckets['Buckets']) > 0:
+                return [self.t(self.driver, bucket, id=bucket['Name']) for bucket in buckets['Buckets']]
+            else:
+                return []
+
+
+
 class AWSDriver(Driver):
     """
     Enables operations with AWS accounts
     """
 
     requires=['aioboto3']
-    provides=[EC2InstanceType]
+    provides=[EC2InstanceType, S3BucketType]
 
     def __init__(self, access_key, access_secret):
         super().__init__()
